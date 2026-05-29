@@ -7,10 +7,12 @@ import DeleteConfirmation from './components/DeleteConfirmation.jsx';
 import logoImg from './assets/logo.png';
 import {sortPlacesByDistance} from "./loc.js";
 
+const PICKED_ITEMS_STORAGE_KEY = 'pickedItems';
+
 function App() {
     const modal = useRef();
     const selectedPlace = useRef();
-    const [pickedPlaces, setPickedPlaces] = useState([]);
+    const [pickedPlaces, setPickedPlaces] = useState(JSON.parse(localStorage.getItem(PICKED_ITEMS_STORAGE_KEY)) || []);
     const [sortedPlaces, setSortedPlaces] = useState([]);
 
     useEffect(() => {
@@ -38,10 +40,13 @@ function App() {
     function handleSelectPlace(id) {
         setPickedPlaces((prevPickedPlaces) => {
             if (prevPickedPlaces.some((place) => place.id === id)) {
+                localStorage.setItem(PICKED_ITEMS_STORAGE_KEY, JSON.stringify(prevPickedPlaces));
                 return prevPickedPlaces;
             }
             const place = AVAILABLE_PLACES.find((place) => place.id === id);
-            return [place, ...prevPickedPlaces];
+            const updatedPickedPlaces = [place, ...prevPickedPlaces];
+            localStorage.setItem(PICKED_ITEMS_STORAGE_KEY, JSON.stringify(updatedPickedPlaces));
+            return updatedPickedPlaces;
         });
     }
 
@@ -49,6 +54,7 @@ function App() {
         setPickedPlaces((prevPickedPlaces) =>
             prevPickedPlaces.filter((place) => place.id !== selectedPlace.current)
         );
+        localStorage.setItem(PICKED_ITEMS_STORAGE_KEY, JSON.stringify(pickedPlaces));
         modal.current.close();
     }
 
